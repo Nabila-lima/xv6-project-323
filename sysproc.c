@@ -11,6 +11,8 @@
 // These are declared in proc.c — we just need to use them
 extern struct proc proc[NPROC];
 extern struct spinlock ptable_lock;
+// In sysproc.c, at the top after includes:
+extern int getpstats(int pid, struct pstats *ps);
 
 int
 sys_fork(void)
@@ -117,4 +119,18 @@ sys_gettimeslice(void)
   if(argint(0, &pid) < 0)
     return -1;
   return gettimeslice(pid);
+}
+
+int
+sys_getpstats(void)
+{
+  int pid;
+  struct pstats *ps;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argptr(1, (void*)&ps, sizeof(*ps)) < 0)
+    return -1;
+
+  return getpstats(pid, ps);
 }

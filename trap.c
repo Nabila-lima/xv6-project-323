@@ -105,6 +105,8 @@ trap(struct trapframe *tf)
     // ====== FINAL PERFECT ADAPTIVE SCHEDULER — EVERYTHING WORKS 100% ======
   if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER){
     struct proc *p = myproc();
+    p->stats.cpu_ticks++;
+
     p->ticks_used++;
 
     // CASE 1: Process used its FULL quantum → CPU-BOUND → PUNISH
@@ -114,6 +116,7 @@ trap(struct trapframe *tf)
       }
       p->io_wait_time = 0;             // no I/O credit for CPU hogs
       p->ticks_used = 0;
+p->stats.preemptions++;
       yield();
     }
     else {

@@ -32,6 +32,15 @@ struct context {
   uint eip;
 };
 
+struct pstats {
+  uint cpu_ticks;
+  uint sleep_ticks;
+  uint runnable_ticks;
+  uint ctx_switches;
+  uint preemptions;
+};
+
+
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
@@ -52,6 +61,8 @@ struct proc {
   int timeslice;               // Our new feature: how many ticks this process gets
   int ticks_used;              // How many ticks it has used in current run
   int io_wait_time;            // How long it waited for I/O (to detect I/O-bound)
+
+struct pstats stats;
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -59,3 +70,6 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+
+int getpstats(int pid, struct pstats *out);

@@ -93,6 +93,8 @@ found:
   p->ticks_used = 0;       // starts with zero ticks used
   p->io_wait_time = 0;     // no I/O wait yet
 
+memset(&p->stats, 0, sizeof(p->stats));
+
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -344,6 +346,8 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+p->stats.runnable_ticks++;
+
   if(p->io_wait_time > 40 && p->timeslice < 60){
     p->timeslice += 8;                    // MASSIVE BOOST for shell/cat/ls
     if(p->timeslice > 60) p->timeslice = 60;
@@ -357,6 +361,8 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+
+p->stats.ctx_switches++;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -454,6 +460,7 @@ sleep(void *chan, struct spinlock *lk)
   p->chan = chan;
   p->state = SLEEPING;
 
+p->stats.sleep_ticks++;
   sched();
 
   // Tidy up.
@@ -600,6 +607,23 @@ gettimeslice(int pid)
       int ts = p->timeslice;
       release(&ptable.lock);
       return ts;
+    }
+  }
+  release(&ptable.lock);
+  return -1;
+}
+
+int
+getpstats(int pid, struct pstats *out)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid && p->state != UNUSED){
+      *out = p->stats;
+      release(&ptable.lock);
+      return 0;
     }
   }
   release(&ptable.lock);

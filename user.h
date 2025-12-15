@@ -1,6 +1,12 @@
 struct stat;
 struct rtcdate;
-
+struct pstats {
+  uint cpu_ticks;
+  uint sleep_ticks;
+  uint runnable_ticks;
+  uint ctx_switches;
+  uint preemptions;
+};
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -26,6 +32,7 @@ int uptime(void);
 int getyear(void);
 int setquantum_pid(int pid, int quantum);
 int gettimeslice(int pid);
+int getpstats(int pid, struct pstats *ps);
 
 // ulib.c
 int stat(const char*, struct stat*);
@@ -40,3 +47,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+

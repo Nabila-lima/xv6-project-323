@@ -23,3 +23,4 @@
 #define SYS_getyear   22
 #define SYS_setquantum_pid  23
 #define SYS_gettimeslice    24
+#define SYS_getpstats    25
