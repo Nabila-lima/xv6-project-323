@@ -39,6 +39,17 @@ struct pstats {
   uint ctx_switches;
   uint preemptions;
 };
+struct procinfo {
+  int pid;
+  char name[16];
+  int state;
+  int priority;
+  int timeslice;
+  uint cpu_ticks;
+  uint sleep_ticks;
+  uint ctx_switches;
+  uint preemptions;
+};
 
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
@@ -61,7 +72,7 @@ struct proc {
   int timeslice;               // Our new feature: how many ticks this process gets
   int ticks_used;              // How many ticks it has used in current run
   int io_wait_time;            // How long it waited for I/O (to detect I/O-bound)
-
+   int priority;                // 0 = highest priority (default)
 struct pstats stats;
 };
 
@@ -73,3 +84,4 @@ struct pstats stats;
 
 
 int getpstats(int pid, struct pstats *out);
+int getprocinfo(int pid, struct procinfo *out);

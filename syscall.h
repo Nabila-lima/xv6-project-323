@@ -24,3 +24,4 @@
 #define SYS_setquantum_pid  23
 #define SYS_gettimeslice    24
 #define SYS_getpstats    25
+#define SYS_getprocinfo  26

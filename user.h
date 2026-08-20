@@ -7,6 +7,17 @@ struct pstats {
   uint ctx_switches;
   uint preemptions;
 };
+struct procinfo {
+  int pid;
+  char name[16];
+  int state;
+  int priority;
+  int timeslice;
+  uint cpu_ticks;
+  uint sleep_ticks;
+  uint ctx_switches;
+  uint preemptions;
+};
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -33,6 +44,7 @@ int getyear(void);
 int setquantum_pid(int pid, int quantum);
 int gettimeslice(int pid);
 int getpstats(int pid, struct pstats *ps);
+int getprocinfo(int pid, struct procinfo *pi);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -90,6 +90,7 @@ found:
   p->pid = nextpid++;
 
   p->timeslice = 10;       // default quantum = 10 ticks
+    p->priority = 5;          // default priority (5 = medium)
   p->ticks_used = 0;       // starts with zero ticks used
   p->io_wait_time = 0;     // no I/O wait yet
 
@@ -221,6 +222,7 @@ fork(void)
   acquire(&ptable.lock);
 
   np->timeslice = curproc->timeslice;   // inherit parent's quantum
+    np->priority = curproc->priority;     // inherit parent's priority
   np->ticks_used = 0;
   np->io_wait_time = 0;
 
@@ -588,6 +590,30 @@ setquantum_pid(int pid, int quantum)
     if(p->pid == pid && p->state != UNUSED){
       p->timeslice = quantum;
       p->ticks_used = 0;
+      release(&ptable.lock);
+      return 0;
+    }
+  }
+  release(&ptable.lock);
+  return -1;
+}
+int
+getprocinfo(int pid, struct procinfo *out)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid && p->state != UNUSED){
+      out->pid          = p->pid;
+      safestrcpy(out->name, p->name, sizeof(out->name));
+      out->state        = p->state;
+      out->priority     = p->priority;
+      out->timeslice    = p->timeslice;
+      out->cpu_ticks    = p->stats.cpu_ticks;
+      out->sleep_ticks  = p->stats.sleep_ticks;
+      out->ctx_switches = p->stats.ctx_switches;
+      out->preemptions  = p->stats.preemptions;
       release(&ptable.lock);
       return 0;
     }
