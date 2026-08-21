@@ -107,6 +107,7 @@ extern int sys_getyear(void);
 extern int sys_setquantum_pid(void);
 extern int sys_gettimeslice(void);
 extern int sys_getpstats(void);
+extern int sys_getprocinfo(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -134,6 +135,7 @@ static int (*syscalls[])(void) = {
 [SYS_setquantum_pid]   sys_setquantum_pid,
 [SYS_gettimeslice]     sys_gettimeslice,
 [SYS_getpstats]   sys_getpstats,
+[SYS_getprocinfo]   sys_getprocinfo,
 };
 
 void

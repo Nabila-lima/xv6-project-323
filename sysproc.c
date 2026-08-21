@@ -111,7 +111,19 @@ sys_setquantum_pid(void)
     return -1;
   return setquantum_pid(pid, quantum);
 }
+int
+sys_getprocinfo(void)
+{
+  int pid;
+  struct procinfo *pi;
 
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argptr(1, (void*)&pi, sizeof(*pi)) < 0)
+    return -1;
+
+  return getprocinfo(pid, pi);
+}
 int
 sys_gettimeslice(void)
 {
