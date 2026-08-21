@@ -9,6 +9,8 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct procinfo;
+
 
 
 
@@ -125,6 +127,7 @@ void            yield(void);
 // Add these in defs.h
 int setquantum_pid(int pid, int quantum);
 int gettimeslice(int pid);
+int getprocinfo(int pid, struct procinfo *out);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
