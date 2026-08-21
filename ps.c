@@ -4,17 +4,7 @@
 #include "types.h"
 #include "user.h"
 
-struct procinfo {
-  int pid;
-  char name[16];
-  int state;
-  int priority;
-  int timeslice;
-  uint cpu_ticks;
-  uint sleep_ticks;
-  uint ctx_switches;
-  uint preemptions;
-};
+
 
 char *statename[] = {
   "unused", "embryo", "sleep ", "runble", "run   ", "zombie"
