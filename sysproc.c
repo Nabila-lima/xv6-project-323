@@ -8,11 +8,10 @@
 #include "proc.h"
 #include "spinlock.h"
 
-// These are declared in proc.c — we just need to use them
-extern struct proc proc[NPROC];
-extern struct spinlock ptable_lock;
-// In sysproc.c, at the top after includes:
-extern int getpstats(int pid, struct pstats *ps);
+
+// ---------------------------------------------------------
+// Process system calls
+// ---------------------------------------------------------
 
 int
 sys_fork(void)
@@ -20,18 +19,23 @@ sys_fork(void)
   return fork();
 }
 
+
 int
 sys_exit(void)
 {
   exit();
-  return 0;  // not reached
+
+  // Not reached.
+  return 0;
 }
+
 
 int
 sys_wait(void)
 {
   return wait();
 }
+
 
 int
 sys_kill(void)
@@ -40,14 +44,21 @@ sys_kill(void)
 
   if(argint(0, &pid) < 0)
     return -1;
+
   return kill(pid);
 }
+
 
 int
 sys_getpid(void)
 {
   return myproc()->pid;
 }
+
+
+// ---------------------------------------------------------
+// Process memory
+// ---------------------------------------------------------
 
 int
 sys_sbrk(void)
@@ -57,11 +68,19 @@ sys_sbrk(void)
 
   if(argint(0, &n) < 0)
     return -1;
+
   addr = myproc()->sz;
+
   if(growproc(n) < 0)
     return -1;
+
   return addr;
 }
+
+
+// ---------------------------------------------------------
+// Sleep
+// ---------------------------------------------------------
 
 int
 sys_sleep(void)
@@ -71,20 +90,32 @@ sys_sleep(void)
 
   if(argint(0, &n) < 0)
     return -1;
+
   acquire(&tickslock);
+
   ticks0 = ticks;
+
   while(ticks - ticks0 < n){
+
     if(myproc()->killed){
       release(&tickslock);
       return -1;
     }
+
     sleep(&ticks, &tickslock);
   }
+
   release(&tickslock);
+
   return 0;
 }
 
-// return how many clock tick interrupts have occurred
+
+// ---------------------------------------------------------
+// Uptime
+// ---------------------------------------------------------
+
+// Return how many clock tick interrupts have occurred
 // since start.
 int
 sys_uptime(void)
@@ -92,25 +123,66 @@ sys_uptime(void)
   uint xticks;
 
   acquire(&tickslock);
+
   xticks = ticks;
+
   release(&tickslock);
+
   return xticks;
 }
+
+
+// ---------------------------------------------------------
+// Get year
+// ---------------------------------------------------------
 
 int
 sys_getyear(void)
 {
-  return 2025;  // Simple hardcoded year
+  return 2025;
 }
+
+
+// ---------------------------------------------------------
+// Round Robin: Set quantum
+// ---------------------------------------------------------
 
 int
 sys_setquantum_pid(void)
 {
-  int pid, quantum;
-  if(argint(0, &pid) < 0 || argint(1, &quantum) < 0)
+  int pid;
+  int quantum;
+
+  if(argint(0, &pid) < 0)
     return -1;
+
+  if(argint(1, &quantum) < 0)
+    return -1;
+
   return setquantum_pid(pid, quantum);
 }
+
+
+// ---------------------------------------------------------
+// Round Robin: Get quantum
+// ---------------------------------------------------------
+
+int
+sys_gettimeslice(void)
+{
+  int pid;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+
+  return gettimeslice(pid);
+}
+
+
+// ---------------------------------------------------------
+// Get process information
+// ---------------------------------------------------------
+
 int
 sys_getprocinfo(void)
 {
@@ -119,46 +191,17 @@ sys_getprocinfo(void)
 
   if(argint(0, &pid) < 0)
     return -1;
+
   if(argptr(1, (void*)&pi, sizeof(*pi)) < 0)
     return -1;
 
   return getprocinfo(pid, pi);
 }
 
-int
-sys_sem_init(void)
-{
-  int value;
-  if(argint(0, &value) < 0)
-    return -1;
-  return sem_init(value);
-}
 
-int
-sys_sem_wait(void)
-{
-  int id;
-  if(argint(0, &id) < 0)
-    return -1;
-  return sem_wait(id);
-}
-
-int
-sys_sem_signal(void)
-{
-  int id;
-  if(argint(0, &id) < 0)
-    return -1;
-  return sem_signal(id);
-}
-int
-sys_gettimeslice(void)
-{
-  int pid;
-  if(argint(0, &pid) < 0)
-    return -1;
-  return gettimeslice(pid);
-}
+// ---------------------------------------------------------
+// Get scheduling statistics
+// ---------------------------------------------------------
 
 int
 sys_getpstats(void)
@@ -168,8 +211,49 @@ sys_getpstats(void)
 
   if(argint(0, &pid) < 0)
     return -1;
+
   if(argptr(1, (void*)&ps, sizeof(*ps)) < 0)
     return -1;
 
   return getpstats(pid, ps);
+}
+
+
+// ---------------------------------------------------------
+// Semaphores
+// ---------------------------------------------------------
+
+int
+sys_sem_init(void)
+{
+  int value;
+
+  if(argint(0, &value) < 0)
+    return -1;
+
+  return sem_init(value);
+}
+
+
+int
+sys_sem_wait(void)
+{
+  int id;
+
+  if(argint(0, &id) < 0)
+    return -1;
+
+  return sem_wait(id);
+}
+
+
+int
+sys_sem_signal(void)
+{
+  int id;
+
+  if(argint(0, &id) < 0)
+    return -1;
+
+  return sem_signal(id);
 }
