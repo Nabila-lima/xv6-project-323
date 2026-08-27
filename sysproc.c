@@ -124,6 +124,33 @@ sys_getprocinfo(void)
 
   return getprocinfo(pid, pi);
 }
+
+int
+sys_sem_init(void)
+{
+  int value;
+  if(argint(0, &value) < 0)
+    return -1;
+  return sem_init(value);
+}
+
+int
+sys_sem_wait(void)
+{
+  int id;
+  if(argint(0, &id) < 0)
+    return -1;
+  return sem_wait(id);
+}
+
+int
+sys_sem_signal(void)
+{
+  int id;
+  if(argint(0, &id) < 0)
+    return -1;
+  return sem_signal(id);
+}
 int
 sys_gettimeslice(void)
 {

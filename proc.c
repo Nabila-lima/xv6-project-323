@@ -13,6 +13,14 @@ struct {
 } ptable;
 
 static struct proc *initproc;
+#define NSEM 10
+
+struct spinlock semlock;
+
+struct semaphore {
+  int value;
+  int allocated;
+} semtable[NSEM];
 
 int nextpid = 1;
 extern void forkret(void);
@@ -24,6 +32,8 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&semlock, "semlock");
+
 }
 
 // Must be called with interrupts disabled
@@ -654,4 +664,50 @@ getprocinfo(int pid, struct procinfo *out)
   }
   release(&ptable.lock);
   return -1;
+}
+
+int
+sem_init(int value)
+{
+  int i;
+
+  acquire(&semlock);
+  for(i = 0; i < NSEM; i++){
+    if(!semtable[i].allocated){
+      semtable[i].allocated = 1;
+      semtable[i].value = value;
+      release(&semlock);
+      return i;
+    }
+  }
+  release(&semlock);
+  return -1;
+}
+
+int
+sem_wait(int id)
+{
+  if(id < 0 || id >= NSEM || !semtable[id].allocated)
+    return -1;
+
+  acquire(&semlock);
+  while(semtable[id].value <= 0){
+    sleep(&semtable[id], &semlock);
+  }
+  semtable[id].value--;
+  release(&semlock);
+  return 0;
+}
+
+int
+sem_signal(int id)
+{
+  if(id < 0 || id >= NSEM || !semtable[id].allocated)
+    return -1;
+
+  acquire(&semlock);
+  semtable[id].value++;
+  wakeup(&semtable[id]);
+  release(&semlock);
+  return 0;
 }

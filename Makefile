@@ -189,6 +189,7 @@ UPROGS=\
         _io_test\
         _iotest\
 	_pstats\
+	   	_semtest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

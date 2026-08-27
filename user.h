@@ -45,6 +45,9 @@ int setquantum_pid(int pid, int quantum);
 int gettimeslice(int pid);
 int getpstats(int pid, struct pstats *ps);
 int getprocinfo(int pid, struct procinfo *pi);
+int sem_init(int value);
+int sem_wait(int id);
+int sem_signal(int id);
 
 // ulib.c
 int stat(const char*, struct stat*);

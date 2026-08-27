@@ -128,6 +128,9 @@ void            yield(void);
 int setquantum_pid(int pid, int quantum);
 int gettimeslice(int pid);
 int getprocinfo(int pid, struct procinfo *out);
+int sem_init(int value);
+int sem_wait(int id);
+int sem_signal(int id);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

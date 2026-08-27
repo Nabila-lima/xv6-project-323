@@ -25,3 +25,6 @@
 #define SYS_gettimeslice    24
 #define SYS_getpstats    25
 #define SYS_getprocinfo  26
+#define SYS_sem_init    27
+#define SYS_sem_wait    28
+#define SYS_sem_signal  29
