@@ -7,7 +7,7 @@ struct cpu {
   volatile uint started;       // Has the CPU started?
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
-  struct proc *proc;           // The process running on this cpu or null
+  struct proc *proc;            // The process running on this cpu or null
 };
 
 extern struct cpu cpus[NCPU];
@@ -32,19 +32,28 @@ struct context {
   uint eip;
 };
 
+// ---------------------------------------------------------
+// CPU Scheduling Statistics
+// ---------------------------------------------------------
+
 struct pstats {
-  uint cpu_ticks;
-  uint sleep_ticks;
-  uint runnable_ticks;
-  uint ctx_switches;
-  uint preemptions;
+  uint cpu_ticks;       // Total CPU ticks used
+  uint sleep_ticks;     // Total ticks spent sleeping
+  uint runnable_ticks;  // Total ticks spent runnable
+  uint ctx_switches;    // Number of context switches
+  uint preemptions;     // Number of timer-based preemptions
 };
+
+// Information returned about a process
 struct procinfo {
   int pid;
   char name[16];
   int state;
-  int priority;
+
+  // Round Robin information
   int timeslice;
+
+  // Scheduling statistics
   uint cpu_ticks;
   uint sleep_ticks;
   uint ctx_switches;
@@ -52,13 +61,24 @@ struct procinfo {
 };
 
 
-enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+enum procstate {
+  UNUSED,
+  EMBRYO,
+  SLEEPING,
+  RUNNABLE,
+  RUNNING,
+  ZOMBIE
+};
 
+
+// ---------------------------------------------------------
 // Per-process state
+// ---------------------------------------------------------
+
 struct proc {
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
-  char *kstack;                // Bottom of kernel stack for this process
+  char *kstack;                // Bottom of kernel stack
   enum procstate state;        // Process state
   int pid;                     // Process ID
   struct proc *parent;         // Parent process
@@ -68,13 +88,22 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
-  int timeslice;               // Our new feature: how many ticks this process gets
-  int ticks_used;              // How many ticks it has used in current run
-  int io_wait_time;            // How long it waited for I/O (to detect I/O-bound)
-  int priority;                // 0 = highest priority (default)
-struct pstats stats;
+  char name[16];               // Process name
+
+  // -------------------------------------------------------
+  // Round Robin Scheduling
+  // -------------------------------------------------------
+
+  int timeslice;               // Fixed CPU time quantum
+  int ticks_used;               // Ticks used in current quantum
+
+  // -------------------------------------------------------
+  // Scheduling Statistics
+  // -------------------------------------------------------
+
+  struct pstats stats;
 };
+
 
 // Process memory is laid out contiguously, low addresses first:
 //   text
@@ -83,4 +112,5 @@ struct pstats stats;
 //   expandable heap
 
 
+// Get scheduling statistics for a process.
 int getpstats(int pid, struct pstats *out);
