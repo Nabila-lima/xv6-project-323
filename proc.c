@@ -1,4 +1,3 @@
-```c
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -1359,4 +1358,3 @@ sem_signal(int id)
 
   return 0;
 }
-```
