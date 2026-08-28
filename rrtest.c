@@ -1,4 +1,3 @@
-```c
 // rrtest.c
 //
 // Round Robin Scheduler Test
@@ -102,4 +101,3 @@ main(void)
 
   exit();
 }
-```
