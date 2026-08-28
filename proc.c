@@ -1190,7 +1190,31 @@ getpstats(int pid, struct pstats *out)
 
   return -1;
 }
+// =========================================================
+// UPDATE SLEEP / RUNNABLE STATISTICS
+// =========================================================
+//
+// Called once per global timer tick (cpu 0 only, from trap.c).
+// A single timer tick only tells us which process is RUNNING
+// on that CPU, so to keep sleep_ticks/runnable_ticks for every
+// other process up to date we walk the whole table once here.
+//
+void
+update_sleep_stats(void)
+{
+  struct proc *p;
 
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == SLEEPING)
+      p->stats.sleep_ticks++;
+    else if(p->state == RUNNABLE)
+      p->stats.runnable_ticks++;
+  }
+
+  release(&ptable.lock);
+}
 
 // =========================================================
 // GET PROCESS INFORMATION

@@ -86,6 +86,9 @@ trap(struct trapframe *tf)
       wakeup(&ticks);
 
       release(&tickslock);
+      // Update sleep_ticks / runnable_ticks for every process
+      // once per global tick (see proc.c).
+      update_sleep_stats();
     }
 
     lapiceoi();

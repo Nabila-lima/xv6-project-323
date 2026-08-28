@@ -114,3 +114,8 @@ struct proc {
 
 // Get scheduling statistics for a process.
 int getpstats(int pid, struct pstats *out);
+
+// Walk the process table once per global tick and update
+// sleep_ticks / runnable_ticks for every process currently
+// SLEEPING or RUNNABLE. Called from trap.c.
+void update_sleep_stats(void);
